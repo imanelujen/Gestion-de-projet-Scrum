@@ -4,13 +4,14 @@ const Project = require("../models/project.model");
 exports.getProjectDashboard = async (req, res) => {
     try {
         const { projectId } = req.params;
+        console.log(`DEBUG Dashboard: Checking access for project ${projectId}, user ${req.user.id}`);
 
         // Check if project exists and user is a member
-        // (Assuming Project.isMember exist or similar check)
         const [members] = await Project.getMembers(projectId);
-        const isMember = members.some(m => m.user_id === req.user.id);
+        const isMember = members.some(m => m.id === req.user.id);
 
         if (!isMember) {
+            console.log(`DEBUG Dashboard: Access denied. ID found in DB:`, members.map(m => m.id));
             return res.status(403).json({ message: "Unauthorized: You are not a member of this project" });
         }
 
