@@ -100,9 +100,21 @@ exports.moveKanbanItem = async (req, res) => {
         }
 
         // 3. Update the item itself
+        let timestampUpdate = "";
+        const updateParams = [finalStatus, finalPosition, finalSprintId];
+
+        if (finalStatus === 'IN_PROGRESS' && !item.started_at) {
+            timestampUpdate = ", started_at = CURRENT_TIMESTAMP";
+        } else if (finalStatus === 'DONE') {
+            timestampUpdate = ", completed_at = CURRENT_TIMESTAMP";
+        } else if (fromStatus === 'DONE' && finalStatus !== 'DONE') {
+            // If moved back from DONE, clear completed_at
+            timestampUpdate = ", completed_at = NULL";
+        }
+
         const [updateResult] = await connection.query(
-            "UPDATE backlog_items SET status = ?, position = ?, sprint_id = ? WHERE id = ?",
-            [finalStatus, finalPosition, finalSprintId, id]
+            `UPDATE backlog_items SET status = ?, position = ?, sprint_id = ? ${timestampUpdate} WHERE id = ?`,
+            [...updateParams, id]
         );
         console.log(`DEBUG: Update result rows: ${updateResult.affectedRows}`);
 

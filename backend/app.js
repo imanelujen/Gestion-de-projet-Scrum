@@ -18,6 +18,7 @@ app.use("/api/backlog", require("./routes/backlog.routes"));
 app.use("/api/kanban", require("./routes/kanban.routes"));
 app.use("/api/comments", require("./routes/comments.routes"));
 app.use("/api/retrospectives", require("./routes/retrospectives.routes"));
+app.use("/api/dashboard", require("./routes/dashboard.routes"));
 
 
 module.exports = app;

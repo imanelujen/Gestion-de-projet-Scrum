@@ -57,6 +57,16 @@ exports.addItem = async (req, res) => {
     }
 };
 
+exports.publishRetrospective = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await Retro.updateRetroStatus(id, 'PUBLISHED');
+        res.json({ message: "Retrospective published successfully", status: 'PUBLISHED' });
+    } catch (err) {
+        res.status(500).json({ message: "Error publishing retrospective", error: err.message });
+    }
+};
+
 exports.voteItem = async (req, res) => {
     try {
         await Retro.voteItem(req.params.id);
@@ -72,5 +82,40 @@ exports.deleteItem = async (req, res) => {
         res.json({ message: "Item deleted" });
     } catch (err) {
         res.status(500).json({ message: "Error deleting item", error: err.message });
+    }
+};
+
+exports.getRetrosByProject = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const [rows] = await Retro.findAllByProject(projectId);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching project retrospectives", error: err.message });
+    }
+};
+
+exports.getTrends = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const [rows] = await Retro.getTrendData(projectId);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching trends", error: err.message });
+    }
+};
+
+exports.updateItemStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { is_completed } = req.body;
+        const [result] = await Retro.updateItemStatus(id, is_completed);
+        res.json({
+            message: "Action item status updated",
+            is_completed,
+            affectedRows: result.affectedRows
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Error updating action item", error: err.message });
     }
 };
